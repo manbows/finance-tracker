@@ -99,4 +99,4 @@ finance-tracker/
 
 ## built by
 
-[Cecile Emeke](https://github.com/manbows)
+[Emma Bowman](https://github.com/manbows)
