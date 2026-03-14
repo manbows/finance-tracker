@@ -6,7 +6,7 @@ A personal finance tracker built with Python and Flask. Log income and expenses,
 
 ---
 
-## preview
+## Preview
 
 ![Dashboard](static/images/dashboard.png)
 ![Add Transaction](static/images/additem.png)
@@ -15,7 +15,7 @@ A personal finance tracker built with Python and Flask. Log income and expenses,
 
 ---
 
-## features
+## Features
 
 - Add and categorise income and expense transactions
 - Dashboard with monthly activity chart (Chart.js)
@@ -24,7 +24,7 @@ A personal finance tracker built with Python and Flask. Log income and expenses,
 - Full transaction history with delete
 - Flash notifications for budget warnings
 
-## tech stack
+## Tech stack
 
 | Layer | Tech |
 |---|---|
@@ -34,7 +34,7 @@ A personal finance tracker built with Python and Flask. Log income and expenses,
 | Data | JSON flat files (local) |
 | Deployment | Railway |
 
-## run locally
+## Run Locally
 
 **1. Clone the repo**
 ```bash
@@ -67,7 +67,7 @@ python app.py
 
 Visit `http://localhost:5000`
 
-## deploy to Railway
+## Deploy to Railway
 
 1. Push this repo to GitHub
 2. Go to [railway.app](https://railway.app) → New Project → Deploy from GitHub repo
@@ -77,7 +77,7 @@ Visit `http://localhost:5000`
 
 > Data is stored in JSON files which do not persist between Railway redeploys. For a persistent production setup, swap the JSON data layer for PostgreSQL — Railway provides a free PostgreSQL instance, and the data helpers in `app.py` are designed to make this straightforward.
 
-## project structure
+## Project Structure
 
 ```
 finance-tracker/
@@ -97,6 +97,6 @@ finance-tracker/
     └── budget.html         # Budget tracker
 ```
 
-## built by
+## Built By
 
 [Emma Bowman](https://github.com/manbows)
