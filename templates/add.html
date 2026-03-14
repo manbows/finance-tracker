@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Add — my ledger{% endblock %}
+{% block content %}
+<div style="max-width: 460px;">
+  <div class="page-header">
+    <div>
+      <h1>add transaction</h1>
+      <p style="color: var(--ink-light); font-size: 0.85rem; margin-top: 0.3rem; font-weight: 600;">record income or an expense</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <form method="POST" action="{{ url_for('add_transaction') }}">
+
+      <div style="margin-bottom: 1.5rem;">
+        <div class="field-label">type</div>
+        <div style="display: flex; gap: 0.6rem;">
+          <label style="flex: 1; cursor: pointer;">
+            <input type="radio" name="type" value="income" id="income-radio" style="display:none;">
+            <div id="income-btn" onclick="selectType('income')"
+              style="text-align: center; padding: 0.75rem; border-radius: var(--radius-md); border: 2px solid var(--cream-dark); background: var(--cream); color: var(--ink-light); font-size: 0.85rem; font-weight: 700; transition: all 0.2s; cursor: pointer;">
+              income
+            </div>
+          </label>
+          <label style="flex: 1; cursor: pointer;">
+            <input type="radio" name="type" value="expense" id="expense-radio" checked style="display:none;">
+            <div id="expense-btn" onclick="selectType('expense')"
+              style="text-align: center; padding: 0.75rem; border-radius: var(--radius-md); border: 2px solid var(--blush-mid); background: #fde8e5; color: var(--blush-deep); font-size: 0.85rem; font-weight: 700; transition: all 0.2s; cursor: pointer;">
+              expense
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 1.25rem;">
+        <label class="field-label">category</label>
+        <input type="text" name="category" placeholder="e.g. salary, groceries, transport" required class="input-field">
+        <div style="font-size: 0.73rem; color: var(--ink-light); font-weight: 600; margin-top: 0.4rem;">one word or use hyphens (e.g. eating-out)</div>
+      </div>
+
+      <div style="margin-bottom: 1.75rem;">
+        <label class="field-label">amount</label>
+        <div style="position: relative;">
+          <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--ink-light); font-weight: 800; font-size: 0.9rem;">£</span>
+          <input type="number" name="amount" step="0.01" min="0.01" placeholder="0.00" required
+            class="input-field" style="padding-left: 1.8rem; font-family: 'Fraunces', serif; font-size: 1.15rem; font-weight: 300;">
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem;">
+        <button type="submit" class="btn btn-primary" style="flex: 1; justify-content: center;">save</button>
+        <a href="{{ url_for('index') }}" class="btn btn-ghost">cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+selectType('expense');
+function selectType(type) {
+  document.getElementById('income-radio').checked = (type === 'income');
+  document.getElementById('expense-radio').checked = (type === 'expense');
+  const ib = document.getElementById('income-btn');
+  const eb = document.getElementById('expense-btn');
+  if (type === 'income') {
+    ib.style.borderColor = 'var(--sage-mid)'; ib.style.background = '#daf0d5'; ib.style.color = 'var(--sage-deep)';
+    eb.style.borderColor = 'var(--cream-dark)'; eb.style.background = 'var(--cream)'; eb.style.color = 'var(--ink-light)';
+  } else {
+    eb.style.borderColor = 'var(--blush-mid)'; eb.style.background = '#fde8e5'; eb.style.color = 'var(--blush-deep)';
+    ib.style.borderColor = 'var(--cream-dark)'; ib.style.background = 'var(--cream)'; ib.style.color = 'var(--ink-light)';
+  }
+}
+</script>
+{% endblock %}

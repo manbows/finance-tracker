@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Ledger{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cream: #faf7f2;
+      --cream-dark: #ede7db;
+      --blush: #f5cfc6;
+      --blush-mid: #e8a99e;
+      --blush-deep: #c4736a;
+      --sage: #c8d8c0;
+      --sage-mid: #8fb383;
+      --sage-deep: #4a7a44;
+      --gold: #e8c87a;
+      --gold-deep: #b08a3a;
+      --ink: #2d2820;
+      --ink-mid: #6b6155;
+      --ink-light: #a89e92;
+      --white: #ffffff;
+      --radius-sm: 12px;
+      --radius-md: 18px;
+      --radius-lg: 24px;
+      --radius-xl: 40px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--cream);
+      color: var(--ink);
+      font-family: 'Nunito', sans-serif;
+      font-weight: 400;
+      min-height: 100vh;
+      background-image: radial-gradient(circle, #cfc5b6 1px, transparent 1px);
+      background-size: 22px 22px;
+    }
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(250,247,242,0.94);
+      backdrop-filter: blur(12px);
+      border-bottom: 1.5px solid var(--cream-dark);
+      padding: 0 2rem; height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-brand {
+      font-family: 'Fraunces', serif;
+      font-size: 1.35rem; font-weight: 300; font-style: italic;
+      color: var(--blush-deep); text-decoration: none;
+    }
+    .nav-brand em { font-style: normal; color: var(--sage-deep); }
+    .nav-links {
+      display: flex; gap: 3px;
+      background: var(--cream-dark); border-radius: var(--radius-xl); padding: 4px;
+    }
+    .nav-links a {
+      color: var(--ink-mid); text-decoration: none;
+      font-size: 0.8rem; font-weight: 700;
+      padding: 0.38rem 1rem; border-radius: var(--radius-xl);
+      transition: all 0.18s;
+    }
+    .nav-links a:hover { color: var(--ink); background: rgba(255,255,255,0.55); }
+    .nav-links a.active { background: var(--white); color: var(--ink); box-shadow: 0 1px 5px rgba(0,0,0,0.09); }
+    .container { max-width: 1060px; margin: 0 auto; padding: 2.5rem 2rem; }
+    h1 { font-family: 'Fraunces', serif; font-size: 2.1rem; font-weight: 300; line-height: 1.2; }
+    h2 { font-family: 'Fraunces', serif; font-size: 1.15rem; font-weight: 300; margin-bottom: 1.1rem; }
+    .card {
+      background: var(--white); border-radius: var(--radius-lg);
+      border: 1.5px solid var(--cream-dark); padding: 1.5rem;
+    }
+    .card-blush { background: #fff9f8; border-color: var(--blush); }
+    .card-sage  { background: #f7fbf6; border-color: var(--sage); }
+    .card-gold  { background: #fdfbf3; border-color: var(--gold); }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    .stat-label {
+      font-size: 0.67rem; font-weight: 800; letter-spacing: 0.11em;
+      text-transform: uppercase; color: var(--ink-light); margin-bottom: 0.5rem;
+    }
+    .stat-value { font-family: 'Fraunces', serif; font-size: 1.9rem; font-weight: 300; line-height: 1; }
+    .c-income { color: var(--sage-deep); }
+    .c-expense { color: var(--blush-deep); }
+    .pill {
+      display: inline-block; font-size: 0.68rem; font-weight: 800;
+      padding: 0.22rem 0.65rem; border-radius: 20px;
+    }
+    .pill-income { background: #daf0d5; color: var(--sage-deep); }
+    .pill-expense { background: #fde8e5; color: var(--blush-deep); }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0.6rem 1.3rem; border-radius: var(--radius-xl);
+      font-size: 0.82rem; font-family: 'Nunito', sans-serif; font-weight: 700;
+      cursor: pointer; border: none; transition: all 0.18s; text-decoration: none;
+    }
+    .btn-primary { background: var(--blush-deep); color: white; box-shadow: 0 2px 8px rgba(196,115,106,0.28); }
+    .btn-primary:hover { background: #b5665d; transform: translateY(-1px); }
+    .btn-sage { background: var(--sage-deep); color: white; box-shadow: 0 2px 8px rgba(74,122,68,0.22); }
+    .btn-sage:hover { background: #3c6437; transform: translateY(-1px); }
+    .btn-ghost { background: var(--cream-dark); color: var(--ink-mid); }
+    .btn-ghost:hover { background: var(--blush); color: var(--blush-deep); }
+    .btn-danger { background: #fde8e5; color: var(--blush-deep); }
+    .btn-danger:hover { background: var(--blush); }
+    .btn-sm { padding: 0.32rem 0.8rem; font-size: 0.74rem; }
+    .flash-messages { margin-bottom: 1.5rem; }
+    .flash { padding: 0.8rem 1.1rem; border-radius: var(--radius-md); font-size: 0.82rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .flash-success { background: #daf0d5; color: var(--sage-deep); border: 1.5px solid var(--sage); }
+    .flash-error   { background: #fde8e5; color: var(--blush-deep); border: 1.5px solid var(--blush); }
+    .flash-warning { background: #fef6e0; color: var(--gold-deep); border: 1.5px solid var(--gold); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    thead th {
+      text-align: left; font-size: 0.67rem; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--ink-light); padding: 0 0.75rem 0.85rem; font-weight: 800;
+      border-bottom: 1.5px solid var(--cream-dark);
+    }
+    tbody td { padding: 0.85rem 0.75rem; border-bottom: 1px solid var(--cream-dark); vertical-align: middle; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: #fdf9f5; }
+    .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2rem; gap: 1rem; }
+    .section-gap { margin-bottom: 1.25rem; }
+    .input-field {
+      width: 100%; background: var(--cream);
+      border: 1.5px solid var(--cream-dark); border-radius: var(--radius-md);
+      padding: 0.72rem 1rem; color: var(--ink);
+      font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 600;
+      outline: none; transition: border-color 0.18s, box-shadow 0.18s;
+    }
+    .input-field:focus { border-color: var(--blush-mid); box-shadow: 0 0 0 3px rgba(232,169,158,0.18); }
+    .input-field::placeholder { color: var(--ink-light); font-weight: 500; }
+    .field-label { display: block; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-mid); margin-bottom: 0.5rem; }
+    @media (max-width: 680px) {
+      .grid-3, .grid-2 { grid-template-columns: 1fr; }
+      .page-header { flex-direction: column; }
+      nav { padding: 0 1rem; }
+      .container { padding: 1.5rem 1rem; }
+    }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <nav>
+    <a href="{{ url_for('index') }}" class="nav-brand">Finance Tracker</a>
+    <div class="nav-links">
+      <a href="{{ url_for('index') }}" {% if request.endpoint == 'index' %}class="active"{% endif %}>overview</a>
+      <a href="{{ url_for('add_transaction') }}" {% if request.endpoint == 'add_transaction' %}class="active"{% endif %}>add</a>
+      <a href="{{ url_for('transactions') }}" {% if request.endpoint == 'transactions' %}class="active"{% endif %}>history</a>
+      <a href="{{ url_for('budget') }}" {% if request.endpoint == 'budget' %}class="active"{% endif %}>budget</a>
+    </div>
+  </nav>
+  <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>

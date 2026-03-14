@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}History — my ledger{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>history</h1>
+    <p style="color: var(--ink-light); font-size: 0.85rem; margin-top: 0.3rem; font-weight: 600;">{{ transactions|length }} transactions total</p>
+  </div>
+  <a href="{{ url_for('add_transaction') }}" class="btn btn-primary">+ add</a>
+</div>
+
+<div class="card">
+  {% if transactions %}
+  <table>
+    <thead>
+      <tr>
+        <th>date</th><th>type</th><th>category</th><th style="text-align:right;">amount</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for t in transactions %}
+      <tr>
+        <td style="color: var(--ink-light); font-size: 0.78rem; font-weight: 700;">{{ t.date[:10] }}</td>
+        <td><span class="pill pill-{{ t.type }}">{{ t.type }}</span></td>
+        <td style="text-transform: capitalize; font-weight: 600; font-size: 0.85rem;">{{ t.category }}</td>
+        <td style="text-align: right; font-family: 'Fraunces', serif; font-size: 0.95rem;" class="{% if t.type == 'income' %}c-income{% else %}c-expense{% endif %}">
+          {% if t.type == 'income' %}+{% else %}-{% endif %}£{{ "%.2f"|format(t.amount) }}
+        </td>
+        <td style="text-align: right;">
+          <form method="POST" action="{{ url_for('delete_transaction', transaction_id=t.id) }}" style="display:inline;" onsubmit="return confirm('delete this one?')">
+            <button type="submit" class="btn btn-danger btn-sm">delete</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p style="color: var(--ink-light); font-size: 0.85rem; font-weight: 600; padding: 0.5rem 0;">
+      nothing here yet — <a href="{{ url_for('add_transaction') }}" style="color: var(--blush-deep);">add your first transaction →</a>
+    </p>
+  {% endif %}
+</div>
+{% endblock %}

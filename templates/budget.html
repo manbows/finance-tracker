@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Budget — my ledger{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>budget</h1>
+    <p style="color: var(--ink-light); font-size: 0.85rem; margin-top: 0.3rem; font-weight: 600;">set your monthly spending limit</p>
+  </div>
+</div>
+
+<div class="grid-2 section-gap">
+  <div class="card card-gold">
+    <h2>set monthly budget</h2>
+    <form method="POST" action="{{ url_for('budget') }}">
+      <div style="margin-bottom: 1.25rem;">
+        <label class="field-label">amount</label>
+        <div style="position: relative;">
+          <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--ink-light); font-weight: 800;">£</span>
+          <input type="number" name="budget" step="0.01" min="0"
+            value="{{ '%.2f'|format(current_budget) if current_budget else '' }}"
+            placeholder="0.00" required
+            class="input-field" style="padding-left: 1.8rem; font-family: 'Fraunces', serif; font-size: 1.1rem; font-weight: 300;">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+        {% if current_budget > 0 %}update budget{% else %}set budget{% endif %}
+      </button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>current status</h2>
+    {% if current_budget > 0 %}
+      <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--cream-dark);">
+        <span style="color: var(--ink-light); font-size: 0.83rem; font-weight: 700;">budget</span>
+        <span style="font-family: 'Fraunces', serif; font-size: 0.95rem;">£{{ "%.2f"|format(current_budget) }}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--cream-dark);">
+        <span style="color: var(--ink-light); font-size: 0.83rem; font-weight: 700;">spent</span>
+        <span style="font-family: 'Fraunces', serif; font-size: 0.95rem;" class="c-expense">£{{ "%.2f"|format(summary.total_expenses) }}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; margin-bottom: 1rem;">
+        <span style="color: var(--ink-light); font-size: 0.83rem; font-weight: 700;">{% if summary.budget_remaining >= 0 %}remaining{% else %}over by{% endif %}</span>
+        <span style="font-family: 'Fraunces', serif; font-size: 0.95rem;" class="{% if summary.budget_remaining >= 0 %}c-income{% else %}c-expense{% endif %}">
+          £{{ "%.2f"|format(summary.budget_remaining|abs) }}
+        </span>
+      </div>
+      <div style="background: var(--cream-dark); border-radius: 20px; height: 10px; overflow: hidden; margin-bottom: 0.4rem;">
+        <div style="height: 100%; border-radius: 20px; width: {{ [summary.budget_pct, 100]|min }}%; background: {% if summary.budget_pct > 100 %}var(--blush-deep){% elif summary.budget_pct > 90 %}var(--gold-deep){% else %}var(--sage-mid){% endif %};"></div>
+      </div>
+      <div style="font-size: 0.73rem; color: var(--ink-light); font-weight: 700;">{{ summary.budget_pct }}% used</div>
+
+      {% if summary.budget_pct > 100 %}
+        <div style="margin-top: 1rem; padding: 0.75rem 1rem; background: #fde8e5; border-radius: var(--radius-md); color: var(--blush-deep); font-size: 0.8rem; font-weight: 700;">
+          You've gone over budget this month.
+        </div>
+      {% elif summary.budget_pct > 90 %}
+        <div style="margin-top: 1rem; padding: 0.75rem 1rem; background: #fef6e0; border-radius: var(--radius-md); color: var(--gold-deep); font-size: 0.8rem; font-weight: 700;">
+          Almost at your limit — spend carefully.
+        </div>
+      {% else %}
+        <div style="margin-top: 1rem; padding: 0.75rem 1rem; background: #daf0d5; border-radius: var(--radius-md); color: var(--sage-deep); font-size: 0.8rem; font-weight: 700;">
+          You're on track — great work.
+        </div>
+      {% endif %}
+    {% else %}
+      <p style="color: var(--ink-light); font-size: 0.85rem; font-weight: 600;">No budget set yet. Enter an amount to start tracking.</p>
+    {% endif %}
+  </div>
+</div>
+
+{% if summary.expense_by_cat %}
+<div class="card">
+  <h2>spending by category</h2>
+  {% for cat, total in summary.expense_by_cat.items() %}
+  <div style="margin-bottom: 1rem;">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 0.35rem;">
+      <span style="font-size: 0.83rem; font-weight: 700; text-transform: capitalize;">{{ cat }}</span>
+      <span style="font-family: 'Fraunces', serif; font-size: 0.9rem;" class="c-expense">£{{ "%.2f"|format(total) }}</span>
+    </div>
+    {% if current_budget > 0 %}
+    <div style="background: var(--cream-dark); border-radius: 20px; height: 6px; overflow: hidden;">
+      <div style="height: 100%; border-radius: 20px; width: {{ [(total / current_budget * 100), 100]|min }}%; background: var(--blush-mid);"></div>
+    </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

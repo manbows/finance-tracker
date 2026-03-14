@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Overview — my ledger{% endblock %}
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>overview</h1>
+    <p style="color: var(--ink-light); font-size: 0.875rem; margin-top: 0.3rem; font-weight: 600;">your financial summary</p>
+  </div>
+  <a href="{{ url_for('add_transaction') }}" class="btn btn-primary">+ add transaction</a>
+</div>
+
+<div class="grid-3 section-gap">
+  <div class="card card-sage" style="text-align: center; padding: 1.75rem 1rem;">
+    <div class="stat-label">money in</div>
+    <div class="stat-value c-income">£{{ "%.2f"|format(summary.total_income) }}</div>
+  </div>
+  <div class="card card-blush" style="text-align: center; padding: 1.75rem 1rem;">
+    <div class="stat-label">money out</div>
+    <div class="stat-value c-expense">£{{ "%.2f"|format(summary.total_expenses) }}</div>
+  </div>
+  <div class="card" style="text-align: center; padding: 1.75rem 1rem; border-color: var(--gold);">
+    <div class="stat-label">balance</div>
+    <div class="stat-value {% if summary.balance >= 0 %}c-income{% else %}c-expense{% endif %}">
+      £{{ "%.2f"|format(summary.balance) }}
+    </div>
+  </div>
+</div>
+
+{% if summary.budget > 0 %}
+<div class="card card-gold section-gap">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+    <div>
+      <div class="stat-label">monthly budget</div>
+      <span style="font-family: 'Fraunces', serif; font-size: 1.1rem; color: var(--gold-deep);">£{{ "%.2f"|format(summary.budget) }}</span>
+    </div>
+    <div style="text-align: right;">
+      <div class="stat-label">{% if summary.budget_remaining >= 0 %}remaining{% else %}over budget!{% endif %}</div>
+      <span style="font-family: 'Fraunces', serif; font-size: 1.1rem;" class="{% if summary.budget_remaining >= 0 %}c-income{% else %}c-expense{% endif %}">
+        £{{ "%.2f"|format(summary.budget_remaining|abs) }}
+      </span>
+    </div>
+  </div>
+  <div style="background: var(--cream-dark); border-radius: 20px; height: 8px; overflow: hidden;">
+    <div style="height: 100%; width: {{ [summary.budget_pct, 100]|min }}%; border-radius: 20px; transition: width 0.6s ease; background: {% if summary.budget_pct > 100 %}var(--blush-deep){% elif summary.budget_pct > 90 %}var(--gold-deep){% else %}var(--sage-mid){% endif %};"></div>
+  </div>
+  <div style="font-size: 0.75rem; color: var(--ink-light); font-weight: 700; margin-top: 0.4rem;">{{ summary.budget_pct }}% used</div>
+</div>
+{% endif %}
+
+<div class="grid-2 section-gap">
+  <div class="card">
+    <h2>monthly activity</h2>
+    <div style="height: 210px; position: relative;">
+      <canvas id="monthlyChart"></canvas>
+    </div>
+  </div>
+  <div class="card card-blush">
+    <h2>top spending</h2>
+    {% if summary.expense_by_cat %}
+      {% for cat, total in summary.expense_by_cat.items() %}
+        {% if loop.index <= 5 %}
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--blush);">
+          <span style="font-size: 0.83rem; font-weight: 600; text-transform: capitalize;">{{ cat }}</span>
+          <span style="font-size: 0.83rem; font-weight: 700; color: var(--blush-deep); font-family: 'Fraunces', serif;">£{{ "%.2f"|format(total) }}</span>
+        </div>
+        {% endif %}
+      {% endfor %}
+    {% else %}
+      <p style="color: var(--ink-light); font-size: 0.85rem; font-weight: 600;">no expenses yet</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+    <h2 style="margin: 0;">recent transactions</h2>
+    <a href="{{ url_for('transactions') }}" class="btn btn-ghost btn-sm">see all →</a>
+  </div>
+  {% if recent %}
+  <table>
+    <thead>
+      <tr>
+        <th>date</th><th>type</th><th>category</th><th style="text-align:right;">amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for t in recent %}
+      <tr>
+        <td style="color: var(--ink-light); font-size: 0.78rem; font-weight: 700;">{{ t.date[:10] }}</td>
+        <td><span class="pill pill-{{ t.type }}">{{ t.type }}</span></td>
+        <td style="text-transform: capitalize; font-weight: 600; font-size: 0.85rem;">{{ t.category }}</td>
+        <td style="text-align: right; font-family: 'Fraunces', serif; font-size: 0.95rem;" class="{% if t.type == 'income' %}c-income{% else %}c-expense{% endif %}">
+          {% if t.type == 'income' %}+{% else %}-{% endif %}£{{ "%.2f"|format(t.amount) }}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p style="color: var(--ink-light); font-size: 0.85rem; font-weight: 600; padding: 0.5rem 0;">
+      nothing here yet — <a href="{{ url_for('add_transaction') }}" style="color: var(--blush-deep);">add your first transaction →</a>
+    </p>
+  {% endif %}
+</div>
+
+<script>
+async function loadChart() {
+  const res = await fetch('/api/chart-data');
+  const data = await res.json();
+  const ctx = document.getElementById('monthlyChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: data.labels,
+      datasets: [
+        { label: 'income', data: data.income, backgroundColor: '#c8d8c0', borderRadius: 8, borderSkipped: false },
+        { label: 'expenses', data: data.expenses, backgroundColor: '#f5cfc6', borderRadius: 8, borderSkipped: false }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#a89e92', font: { family: 'Nunito', size: 11, weight: '700' } } } },
+      scales: {
+        x: { ticks: { color: '#a89e92', font: { size: 11, weight: '700' } }, grid: { color: '#ede7db' } },
+        y: { ticks: { color: '#a89e92', font: { size: 11 }, callback: v => '£' + v }, grid: { color: '#ede7db' } }
+      }
+    }
+  });
+}
+loadChart();
+</script>
+{% endblock %}
